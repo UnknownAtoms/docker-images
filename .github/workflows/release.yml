@@ -1,0 +1,38 @@
+name: build-on-tag
+
+on:
+  push:
+    tags:
+      - "*-*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse tag
+        id: vars
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          VERSION=${TAG%-*}
+          IMAGE=${TAG##*-}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: images/${{ steps.vars.outputs.image }}
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.version }}
