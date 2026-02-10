@@ -4,6 +4,7 @@ RUN apt-get update
 RUN apt-get install -y --no-install-recommends ca-certificates curl jq tar
 RUN rm -rf /var/lib/apt/lists/*
 
+# https://github.com/bitnami-labs/sealed-secrets?tab=readme-ov-file#linux
 # Récupérer la dernière version
 RUN KUBESEAL_VERSION=$(curl -fsSL https://api.github.com/repos/bitnami-labs/sealed-secrets/tags \
     | jq -r '.[0].name' \
